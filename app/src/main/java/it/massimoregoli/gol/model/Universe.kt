@@ -26,8 +26,8 @@ class Universe {
             ret.map = Array(dx) { Array(dy) { 0 } }
             ret.newMap = Array(dx) { Array(dy) { 0 } }
 // Just for fun
-//            val glider = GOSPEL
-//            ret.addGlider(2,51, glider)
+            val glider = GOSPEL
+            ret.addGlider(2,51, glider)
             val conway = CONWAY
             ret.addGlider(dx/2, dy-10, conway)
 
