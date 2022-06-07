@@ -10,9 +10,7 @@ import kotlinx.coroutines.launch
 class GoLViewModel: ViewModel() {
 
     var universe = MutableLiveData(Universe())
-    val _universe: LiveData<Universe> = universe
     var eta = MutableLiveData(0)
-    val _eta: LiveData<Int> = eta
     var paused = MutableLiveData(false)
     private val state = MutableLiveData(0)
 
@@ -38,14 +36,15 @@ class GoLViewModel: ViewModel() {
     fun start(onStep: () -> Unit) {
         if (universe.value != null) {
             state.value = 1
+            paused.value = false
             CoroutineScope(Dispatchers.IO).launch {
-                while (state.value == 1) {
+                while (state.value == 1 && paused.value == false) {
                     universe.value!!.next()
                     CoroutineScope(Dispatchers.Main).launch {
                         onStep()
                         eta.value = eta.value?.plus(1)
                     }
-                    Thread.sleep(250)
+                    Thread.sleep(100)
                 }
             }
         }
@@ -61,6 +60,5 @@ class GoLViewModel: ViewModel() {
 
     fun pause() {
         paused.value = true
-        state.value = 0
     }
 }

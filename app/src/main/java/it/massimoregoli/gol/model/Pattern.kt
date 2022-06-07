@@ -1,12 +1,21 @@
 package it.massimoregoli.gol.model
 
+import android.os.Parcelable
 import android.util.Log
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
-data class Glider(val s: String) {
+@Parcelize
+data class Pattern(val s: String): Parcelable {
+    @IgnoredOnParcel
     var dimX: Int = 0
+    @IgnoredOnParcel
     var dimY: Int = 0
+    @IgnoredOnParcel
     private var rule: String = ""
+    @IgnoredOnParcel
     private var string: String = ""
+    @IgnoredOnParcel
     var map = emptyArray<Array<Int>>()
 
     init {
@@ -30,11 +39,11 @@ data class Glider(val s: String) {
         }
         map = Array(dimX) { Array(dimY) { 0 } }
         if (string != "") {
-            createGlider(string)
+            createPattern(string)
         }
     }
 
-    private fun createGlider(glider:String) {
+    private fun createPattern(glider:String) {
         var dx = 0
         var dy = 0
         var rep = 0

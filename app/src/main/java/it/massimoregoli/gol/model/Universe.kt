@@ -1,6 +1,5 @@
 package it.massimoregoli.gol.model
 
-import android.util.Log
 import it.massimoregoli.gol.util.CONWAY
 import it.massimoregoli.gol.util.GOSPEL
 import kotlin.random.Random
@@ -27,8 +26,8 @@ class Universe {
             ret.map = Array(dx) { Array(dy) { 0 } }
             ret.newMap = Array(dx) { Array(dy) { 0 } }
 // Just for fun
-            val glider = GOSPEL
-            ret.addGlider(2,51, glider)
+//            val glider = GOSPEL
+//            ret.addGlider(2,51, glider)
             val conway = CONWAY
             ret.addGlider(dx/2, dy-10, conway)
 
@@ -65,7 +64,7 @@ class Universe {
         }
     }
 
-    fun addGlider(x: Int, y: Int, glider:Glider) {
+    fun addGlider(x: Int, y: Int, glider:Pattern) {
         for (i in 0 until glider.dimX) {
             for (j in 0 until glider.dimY) {
                 map[x+i][y+j] = glider.map[i][j]

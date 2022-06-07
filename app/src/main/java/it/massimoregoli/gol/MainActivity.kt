@@ -19,7 +19,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.lifecycle.ViewModelProvider
@@ -45,13 +47,7 @@ class MainActivity : ComponentActivity() {
                 state.value = model.universe.value!!.eta
                 Log.w("GOL", "ETA")
             }
-//            model.universe.observe(this) {
-//                Log.w("GOL", "UNIVERSE")
-//            }
-
-
             GoLTheme {
-
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
@@ -67,15 +63,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
-        if (model.paused.value == false) {
+        if (model.paused.value == false && model.isRunning()) {
             model.pause()
         }
 
     }
 
-    override fun onRestart() {
-        super.onRestart()
-        if (model.paused.value == true)
+    override fun onStart() {
+        super.onStart()
+        if (model.paused.value == true && model.isRunning())
             model.start() {}
     }
 }
@@ -95,21 +91,22 @@ fun Universe(model: GoLViewModel, state: MutableState<Int>) {
             Size(2*universe.dimX.toFloat()*radius-radius+12,
                 2*universe.dimY.toFloat()*radius-radius+12),
             style = Stroke(radius))
+
+
         universe.map.forEachIndexed { i, row ->
             row.forEachIndexed { j, value ->
                 if (value != 0) {
-                    drawCircle(color = Color.Black,
-                        radius = radius,
+                    drawCircle(Color.Gray,
+                        radius = radius/2,
                         center = Offset(startX + i.toFloat()*radius*2,
                             startY + j.toFloat()*radius*2),
                         style = Fill
                     )
-
                     drawCircle(color = Color.Red,
                         radius = radius,
                         center = Offset(startX + i.toFloat()*radius*2,
                             startY + j.toFloat()*radius*2),
-                        style = Stroke(6.0f)
+                        style = Stroke(1.0f)
                     )
                 }
             }
@@ -122,8 +119,10 @@ fun Greeting(u: GoLViewModel, eta: MutableState<Int>) {
     Text(text = "Hello ${eta.value} ${u.universe.value!!.getCell(0, 0)}!",
     modifier = Modifier.clickable {
         if (u.isRunning()) {
-            u.stop()
+            u.pause()
         } else {
+//            u.createUniverse(70, 140, Rule("", "", "B3/S23"))
+
             u.start {
 //                eta.value = u.universe.value!!.eta
                 Log.w("GOL", "${u.universe.value?.dimX} ${u.universe.value?.dimY} ${eta.value} ${u.universe.value!!.getCell(0, 0)}")
