@@ -5,45 +5,65 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
-class GoLViewModel: ViewModel() {
 
+class GoLViewModel : ViewModel() {
+//    val mapLiveData: LiveData<SnapshotStateList<Array<Int>>>
+//        get() = map
+//    private val map = MutableLiveData<SnapshotStateList<Array<Int>>>()
+//    private var mapImpl = mutableStateListOf<Array<Int>>()
     var universe = MutableLiveData(Universe())
     var eta = MutableLiveData(0)
-    var paused = MutableLiveData(false)
+    private var paused = MutableLiveData(false)
+    var speed = MutableLiveData(100L)
     private val state = MutableLiveData(0)
 
     fun getUniverse(): Universe {
         return universe.value!!
     }
 
-    fun createUniverse(dx: Int, dy: Int, r: Rule) {
+//    private fun postUniverse() {
+//        Log.w("GOL2", "START POST")
+//        try {
+//            mapImpl.clear()
+//            for (ints in universe.value!!.map) {
+//                mapImpl.add(ints)
+//            }
+//            map.postValue(mapImpl)
+//        } catch (e: IndexOutOfBoundsException) {
+//            Log.e("GOL", e.toString())
+//        }
+//        Log.w("GOL2", "END POST")
+//    }
+
+    private fun createUniverse(dx: Int, dy: Int, r: Rule) {
         universe.value = Universe.createUniverse(dx, dy, r)
+//        postUniverse()
         eta.value = 0
     }
 
-    fun next() {
-        paused.value = false
-        CoroutineScope(Dispatchers.IO).launch {
-            if (universe.value != null) {
-                universe.value!!.next()
-            }
-        }
+    fun speedDown() {
+        speed.value = speed.value?.plus(10L)
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
-    fun start(onStep: () -> Unit) {
+    fun speedUp() {
+        if (speed.value!! > 10)
+            speed.value = speed.value?.minus(10L)
+    }
+
+    fun start() {
         if (universe.value != null) {
             state.value = 1
             paused.value = false
-            CoroutineScope(Dispatchers.IO).launch {
+
+            CoroutineScope(Dispatchers.Default).launch {
+
                 while (state.value == 1 && paused.value == false) {
-                    universe.value!!.next()
-                    CoroutineScope(Dispatchers.Main).launch {
-                        onStep()
-                        eta.value = eta.value?.plus(1)
+                    runBlocking {
+                        evolve()
                     }
-                    Thread.sleep(100)
+                    Thread.sleep(speed.value!!.toLong())
                 }
             }
         }
@@ -59,5 +79,25 @@ class GoLViewModel: ViewModel() {
 
     fun pause() {
         paused.value = true
+    }
+
+    private fun evolve() {
+        universe.value!!.next()
+//        postUniverse()
+        CoroutineScope(Dispatchers.Main).launch {
+            eta.value = eta.value?.plus(1)
+        }
+    }
+
+    fun step() {
+        if (universe.value != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                evolve()
+            }
+        }
+    }
+
+    init {
+        createUniverse(60, 120, Rule("", "", "B3/S23"))
     }
 }

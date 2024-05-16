@@ -1,7 +1,7 @@
 package it.massimoregoli.gol.model
 
-import it.massimoregoli.gol.util.CONWAY
-import it.massimoregoli.gol.util.GOSPEL
+import it.massimoregoli.gol.util.DEFAULT_GLIDER
+import it.massimoregoli.gol.util.ISATORO
 import kotlin.random.Random
 
 class Universe {
@@ -26,10 +26,11 @@ class Universe {
             ret.map = Array(dx) { Array(dy) { 0 } }
             ret.newMap = Array(dx) { Array(dy) { 0 } }
 // Just for fun
-            val glider = GOSPEL
-            ret.addGlider(2,51, glider)
-            val conway = CONWAY
-            ret.addGlider(dx/2, dy-10, conway)
+//            val glider = GOSPEL
+//            ret.addGlider(2,dy/2, glider)
+//            val conway = CONWAY
+//            ret.addGlider(dx/2, dy-10, conway)
+            ret.addGlider(dx/2, dy/2, DEFAULT_GLIDER)
 
             return ret
         }
@@ -47,7 +48,6 @@ class Universe {
                 newMap[i][j] = rule.intRule[map[i][j]][alive]
             }
         }
-
         for (i in map.indices) {
             for (j in map[i].indices) {
                 map[i][j] = newMap[i][j]
@@ -75,12 +75,16 @@ class Universe {
     private fun countAliveNeighbors(xPos: Int, yPos: Int): Int {
         var alive = 0
         for (i in -1..1) {
-            val x = xPos + i
+            var x = xPos + i
+            if (ISATORO)
+                x = (x + dimX) % dimX
             if (x in 0 until dimX) {
                 for (j in -1..1) {
                     if (i == 0 && j == 0)
                         continue
-                    val y = yPos + j
+                    var y = yPos + j
+                    if (ISATORO)
+                        y = (y + dimY) % dimY
                     if (y in 0 until dimY) {
                         alive += if (map[x][y] == 0) 0 else 1
                     }
